@@ -8,6 +8,8 @@ require (
 )
 
 require (
+	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/stretchr/testify v1.7.2 // indirect
 )
