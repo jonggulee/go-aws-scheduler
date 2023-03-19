@@ -245,7 +245,7 @@ func StartDBInstanceHandler() {
 					instance := dbInstanceStatus{
 						Status: "정상적으로 RDS를 시작하였습니다.",
 						Id:     InstanceId,
-						Err:    err,
+						Err:    nil,
 					}
 					instances = append(instances, instance)
 					// 확인 출력 코드

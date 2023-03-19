@@ -11,6 +11,8 @@ import (
 	"github.com/slack-go/slack"
 )
 
+var AwsRegion = "ap-northeast-2"
+
 type instanceStatus struct {
 	Status string
 	Id     string
@@ -18,9 +20,9 @@ type instanceStatus struct {
 }
 
 func slackNoti(inst []instanceStatus) error {
-
+	value := "```"
+	color := "#18be52"
 	attachment := slack.Attachment{
-		Color: "#18be52",
 		Fields: []slack.AttachmentField{
 			{
 				Title: "Instance start result",
@@ -34,16 +36,17 @@ func slackNoti(inst []instanceStatus) error {
 			},
 		},
 	}
-	value := "```"
-	color := "#18be52"
 	for _, i := range inst {
 		if i.Err != nil {
+			newFieldValue := ":x: Failed"
 			color = "#E96D76"
 			attachment.Fields = append(attachment.Fields, slack.AttachmentField{
 				Title: "Error",
 				Value: fmt.Sprintf("```%s```", i.Err),
 				Short: false,
 			})
+			targetField := &attachment.Fields[0]
+			targetField.Value = newFieldValue
 		}
 		value += fmt.Sprintf("%s %s\n", i.Status, i.Id)
 	}
@@ -98,12 +101,13 @@ func startInstance(svc ec2iface.EC2API, instanceID []*string) (string, error) {
 		// Set DryRun to be false to enable starting the instances
 		input.DryRun = aws.Bool(false)
 		startInstancesOutput, err = svc.StartInstances(input)
-		// snippet-end:[ec2.go.start_stop_instances.start]
 		if err != nil {
 			return "", err
 		}
-
-		return "", nil
+		for _, startingInstance := range startInstancesOutput.StartingInstances {
+			currentState := startingInstance.CurrentState
+			return *currentState.Name, nil
+		}
 	}
 	for _, startingInstance := range startInstancesOutput.StartingInstances {
 		currentState := startingInstance.CurrentState
@@ -113,12 +117,7 @@ func startInstance(svc ec2iface.EC2API, instanceID []*string) (string, error) {
 	return "", err
 }
 
-func main() {
-	// lambda.Start(myApp)
-	// instance.MyApp()
-	// lambda.Start(instance.MyApp())
-	// instance.StopInstances()
-
+func StartInstanceHandler() {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
@@ -134,7 +133,6 @@ func main() {
 	if err != nil {
 		fmt.Println("Check error the instance")
 		fmt.Println(err)
-		// return err
 	}
 
 	instances := []instanceStatus{}
@@ -143,7 +141,7 @@ func main() {
 			instnace := instanceStatus{
 				Status: "이미 인스턴스가 실행중 입니다.",
 				Id:     instanceId,
-				Err:    nil,
+				Err:    err,
 			}
 			instances = append(instances, instnace)
 			continue
@@ -152,16 +150,14 @@ func main() {
 			instnace := instanceStatus{
 				Status: "인스턴스가 pending 상태 입니다. 인스턴스의 상태를 확인해주세요.",
 				Id:     instanceId,
-				Err:    nil,
+				Err:    err,
 			}
 			instances = append(instances, instnace)
 			continue
 		}
 
-		if status == "stopped" {
+		if status != "running" && status != "pending" {
 			startInstanceResult, err := startInstance(svc, []*string{aws.String(instanceId)})
-			// err := startInstance(svc, instanceIDs)
-			fmt.Println(startInstanceResult)
 			if err != nil {
 				instance := instanceStatus{
 					Status: "인스턴스가 시작 중에 문제가 생겼습니다. 인스턴스의 상태를 확인해주세요.",
@@ -182,9 +178,5 @@ func main() {
 			}
 		}
 	}
-
-	// fmt.Println(instances)
 	slackNoti(instances)
-
-	// instance.StopInstances()
 }
