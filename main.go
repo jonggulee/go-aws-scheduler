@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	rds "github.com/MZCBBD/AWSScheduler/handlers"
+	"github.com/MZCBBD/AWSScheduler/rds"
 )
 
 func handler() {
