@@ -217,8 +217,10 @@ func StopInstanceHandler() {
 
 	// EC2 인스턴스 ID 지정
 	instanceIDs := []*string{
-		aws.String("i-0420a345119580384"),
-		aws.String("i-03ecc4d66213d0b37"),
+		// sec-mgmt-jenkins
+		aws.String("i-0acab82eb643706cd"),
+		// sec-mgmt-eks-admin
+		aws.String("i-04a4829ec4cf60254"),
 	}
 
 	// EC2 인스턴스 상태 확인
