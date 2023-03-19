@@ -1,4 +1,4 @@
-package instancestart
+package ec2
 
 import (
 	"fmt"

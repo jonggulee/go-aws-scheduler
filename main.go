@@ -3,22 +3,21 @@ package main
 import (
 	"os"
 
-	"github.com/MZCBBD/AWSScheduler/handlers"
-	"github.com/aws/aws-lambda-go/lambda"
+	rds "github.com/MZCBBD/AWSScheduler/handlers"
 )
 
 func handler() {
 	if os.Getenv("target") == "rds" {
 		if os.Getenv("env") == "stop" {
-			handlers.StopDBInstanceHandler()
+			rds.StopDBInstanceHandler()
 		}
-		// if os.Getenv("ENV") == "start" {
-		// startDBInstanceHandler()
-		// }
+		if os.Getenv("env") == "start" {
+			rds.StartDBInstanceHandler()
+		}
 	}
 }
 
 func main() {
-	// handler()
-	lambda.Start(handler)
+	handler()
+	// lambda.Start(handler)
 }
