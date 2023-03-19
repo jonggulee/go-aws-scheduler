@@ -117,6 +117,31 @@ func startInstance(svc ec2iface.EC2API, instanceID []*string) (string, error) {
 	return "", err
 }
 
+func stopInstance(svc ec2iface.EC2API, instanceID []*string) (string, error) {
+	input := &ec2.StopInstancesInput{
+		InstanceIds: instanceID,
+		DryRun:      aws.Bool(true),
+	}
+
+	stopInstancesOutput, err := svc.StopInstances(input)
+
+	awsErr, ok := err.(awserr.Error)
+	if ok && awsErr.Code() == "DryRunOperation" {
+		input.DryRun = aws.Bool(false)
+		stopInstancesOutput, err = svc.StopInstances(input)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	// EC2 인스턴스 종료 후 상태 확인
+	for _, stoppingInstance := range stopInstancesOutput.StoppingInstances {
+		currentState := stoppingInstance.CurrentState
+		return *currentState.Name, nil
+	}
+	return "", err
+}
+
 func StartInstanceHandler() {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
@@ -170,6 +195,76 @@ func StartInstanceHandler() {
 			if startInstanceResult == "pending" {
 				instance := instanceStatus{
 					Status: "정상적으로 인스턴스가 시작되었습니다.",
+					Id:     instanceId,
+					Err:    nil,
+				}
+				instances = append(instances, instance)
+				continue
+			}
+		}
+	}
+	slackNoti(instances)
+}
+
+func StopInstanceHandler() {
+	// 세션 생성
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+
+	// EC2 서비스 생성
+	svc := ec2.New(sess)
+
+	// EC2 인스턴스 ID 지정
+	instanceIDs := []*string{
+		aws.String("i-0420a345119580384"),
+		aws.String("i-03ecc4d66213d0b37"),
+	}
+
+	// EC2 인스턴스 상태 확인
+	getInstanceStatus, err := getInstanceStatus(svc, instanceIDs)
+	if err != nil {
+		fmt.Println("Check error the instance")
+		fmt.Println(err)
+	}
+
+	// 현재 EC2 인스턴스 상태에 따른 인스턴스 종료 여부 확인
+	instances := []instanceStatus{}
+	for instanceId, status := range getInstanceStatus {
+		if status == "stopped" {
+			instance := instanceStatus{
+				Status: "이미 인스턴스가 중지되어있습니다.",
+				Id:     instanceId,
+				Err:    err,
+			}
+			instances = append(instances, instance)
+			continue
+		}
+
+		if status == "stopping" {
+			instance := instanceStatus{
+				Status: "이미 인스턴스가 중지중 입니다. 인스턴스의 상태를 확인해주세요.",
+				Id:     instanceId,
+				Err:    err,
+			}
+			instances = append(instances, instance)
+			continue
+		}
+
+		if status != "stopped" && status != "stopping" {
+			stopInstanceResult, err := stopInstance(svc, []*string{aws.String(instanceId)})
+			if err != nil {
+				instance := instanceStatus{
+					Status: "인스턴스가 중지 중에 문제가 생겼습니다. 인스턴스의 상태를 확인해주세요.",
+					Id:     instanceId,
+					Err:    err,
+				}
+				instances = append(instances, instance)
+				continue
+			}
+			if stopInstanceResult == "stopping" {
+				instance := instanceStatus{
+					Status: "정상적으로 인스턴스가 중지되었습니다.",
 					Id:     instanceId,
 					Err:    nil,
 				}
