@@ -41,4 +41,5 @@ jobs:
           aws lambda update-function-code --function-name StopRDSInstance --zip-file fileb://main.zip
           aws lambda update-function-code --function-name StartEC2Instance --zip-file fileb://main.zip
           aws lambda update-function-code --function-name StartRDSInstance --zip-file fileb://main.zip
-          
+          aws lambda update-function-code --function-name StopAutoScaling --zip-file fileb://main.zip
+          aws lambda update-function-code --function-name StartAutoScaling --zip-file fileb://main.zip
