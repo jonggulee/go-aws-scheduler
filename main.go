@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 
+	autoscaling "github.com/MZCBBD/AWSScheduler/autoscaling/controller"
 	ec2 "github.com/MZCBBD/AWSScheduler/ec2/controller"
 	rds "github.com/MZCBBD/AWSScheduler/rds/controller"
-	"github.com/aws/aws-lambda-go/lambda"
 )
 
 func handler() {
@@ -25,11 +25,20 @@ func handler() {
 			ec2.StartInstanceHandler()
 		}
 	}
+	if os.Getenv("target") == "autoscaling" {
+		if os.Getenv("env") == "stop" {
+			autoscaling.StopAutoScalingHandler()
+
+		}
+		// if os.Getenv("env") == "start" {
+		// 	ec2.StartInstanceHandler()
+		// }
+	}
 }
 
 func main() {
-	lambda.Start(handler)
+	// lambda.Start(handler)
 
 	// 로컬 테스트 실행 명령어
-	// handler()
+	handler()
 }
