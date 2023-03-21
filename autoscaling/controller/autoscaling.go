@@ -77,8 +77,51 @@ func StopAutoScalingHandler() {
 			}
 		}
 		if autoScalingGroup.DesiredCapacity >= 0 {
-			fmt.Printf("이미 종료되었습니다. %s", autoScalingGroup.AutoScalingGroupName)
+			fmt.Printf("이미 종료되었습니다. AutoScaling 상태를 확인해주세요.\n AutoScalingGroupName: %s / DesiredCapacity: %d\n", autoScalingGroup.AutoScalingGroupName, autoScalingGroup.DesiredCapacity)
 		}
 	}
+}
 
+func StartAutoScaling(svc autoscalingiface.AutoScalingAPI, autoScalingGroupName string) error {
+	input := &autoscaling.SetDesiredCapacityInput{
+		AutoScalingGroupName: aws.String(autoScalingGroupName),
+		DesiredCapacity:      aws.Int64(2),
+	}
+
+	_, err := svc.SetDesiredCapacity(input)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return nil
+}
+
+func StartAutoScalingHandler() {
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+
+	svc := autoscaling.New(sess)
+
+	autoScalingGroupNames := []*string{
+		aws.String("test"),
+		aws.String("abcd"),
+	}
+
+	autoScalingStatus, err := getAutoScalingGroups(svc, autoScalingGroupNames)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	for _, autoScalingGroup := range autoScalingStatus {
+		if autoScalingGroup.DesiredCapacity >= 0 {
+			fmt.Printf("이미 동작 중입니다. AutoScaling 상태를 확인해주세요.\n AutoScalingGroupName: %s / DesiredCapacity: %d\n", autoScalingGroup.AutoScalingGroupName, autoScalingGroup.DesiredCapacity)
+		}
+		if autoScalingGroup.DesiredCapacity == 0 {
+			err := StartAutoScaling(svc, autoScalingGroup.AutoScalingGroupName)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}
 }
