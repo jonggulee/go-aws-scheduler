@@ -193,7 +193,7 @@ func StartDBInstanceHandler() {
 
 	dbInstanceIdentifiers := []*string{
 		aws.String("dev-mzwallet-mariadb"),
-		aws.String("dev-mzpay-mariadb"),
+		// aws.String("dev-mzpay-mariadb"),
 	}
 
 	instances := []dbInstanceStatus{}
@@ -248,8 +248,7 @@ func StartDBInstanceHandler() {
 						Err:    nil,
 					}
 					instances = append(instances, instance)
-					// 확인 출력 코드
-					fmt.Println("정상적으로 RDS를 중지하였습니다.", *dbInstanceIdentifier)
+					fmt.Println("정상적으로 RDS를 시작하였습니다.", *dbInstanceIdentifier)
 					continue
 				}
 			}

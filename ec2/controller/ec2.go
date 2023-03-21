@@ -88,7 +88,6 @@ func getInstanceStatus(svc ec2iface.EC2API, instanceIDs []*string) (map[string]s
 }
 
 func startInstance(svc ec2iface.EC2API, instanceID []*string) (string, error) {
-	// snippet-start:[ec2.go.start_stop_instances.start]
 	input := &ec2.StartInstancesInput{
 		InstanceIds: instanceID,
 		DryRun:      aws.Bool(true),
@@ -98,7 +97,6 @@ func startInstance(svc ec2iface.EC2API, instanceID []*string) (string, error) {
 	awsErr, ok := err.(awserr.Error)
 
 	if ok && awsErr.Code() == "DryRunOperation" {
-		// Set DryRun to be false to enable starting the instances
 		input.DryRun = aws.Bool(false)
 		startInstancesOutput, err = svc.StartInstances(input)
 		if err != nil {
@@ -150,8 +148,10 @@ func StartInstanceHandler() {
 	svc := ec2.New(sess)
 
 	instanceIDs := []*string{
-		aws.String("i-0420a345119580384"),
-		aws.String("i-03ecc4d66213d0b37"),
+		// sec-mgmt-jenkins
+		aws.String("i-0acab82eb643706cd"),
+		// sec-mgmt-eks-admin
+		aws.String("i-04a4829ec4cf60254"),
 	}
 
 	getInstanceStatus, err := getInstanceStatus(svc, instanceIDs)
