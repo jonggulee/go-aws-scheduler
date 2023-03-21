@@ -26,7 +26,7 @@ jobs:
 
       - name: Build
         run: |
-          GOOS=linux GOARCH=amd64 go build -v -o main main.go && zip main.zip main
+          GOOS=linux GOARCH=amd64 go build -o main main.go && zip main.zip main
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
