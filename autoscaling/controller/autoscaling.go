@@ -111,8 +111,8 @@ func StopAutoScalingHandler() {
 	svc := autoscaling.New(sess)
 
 	autoScalingGroupNames := []*string{
-		aws.String("test"),
-		aws.String("abcd"),
+		aws.String("eks-dev-mzwallet-eks-ng-2023011409042831340000000d-e2c2d7c2-f79e-e0b3-82a8-aa840609f926"),
+		// aws.String("eks-dev-mzpay-eks-ng-20230313072707645300000002-26c36cee-d511-116b-a0b6-53db7f537fa1"),
 	}
 
 	autoScalingGroupStatus, err := getAutoScalingGroups(svc, autoScalingGroupNames)
@@ -156,8 +156,8 @@ func StartAutoScalingHandler() {
 	svc := autoscaling.New(sess)
 
 	autoScalingGroupNames := []*string{
-		aws.String("test"),
-		aws.String("abcd"),
+		aws.String("eks-dev-mzwallet-eks-ng-2023011409042831340000000d-e2c2d7c2-f79e-e0b3-82a8-aa840609f926"),
+		// aws.String("eks-dev-mzpay-eks-ng-20230313072707645300000002-26c36cee-d511-116b-a0b6-53db7f537fa1"),
 	}
 
 	autoScalingGroupStatus, err := getAutoScalingGroups(svc, autoScalingGroupNames)
