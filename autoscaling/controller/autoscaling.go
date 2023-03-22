@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/autoscaling/autoscalingiface"
+	"github.com/slack-go/slack"
 )
 
 type autoScalingStatus struct {
@@ -14,6 +15,56 @@ type autoScalingStatus struct {
 	DesiredCapacity      int
 	Msg                  string
 	Err                  error
+}
+
+func slackNoti(autoScalingStatus []autoScalingStatus) error {
+	value := "```"
+	successColor := "#18be52"
+	failedColor := "#E96D76"
+	failedValue := ":x: Failed"
+
+	attachment := slack.Attachment{
+		Fields: []slack.AttachmentField{
+			{
+				Title: "AutoScaling result",
+				Value: ":white_check_mark: Success",
+				Short: false,
+			},
+			{
+				Title: "Target AutoScaling Groups",
+				Value: "",
+				Short: false,
+			},
+		},
+	}
+	attachment.Color = successColor
+
+	for _, autoScalingStatus := range autoScalingStatus {
+
+		if autoScalingStatus.Err != nil {
+			attachment.Fields = append(attachment.Fields, slack.AttachmentField{
+				Title: "Error",
+				Value: fmt.Sprintf("```%s```", autoScalingStatus.Err),
+				Short: false,
+			})
+			targetField := &attachment.Fields[0]
+			targetField.Value = failedValue
+			attachment.Color = failedColor
+		}
+	}
+	attachment.Fields[1].Value = value + "```"
+
+	msg := slack.WebhookMessage{
+		Attachments: []slack.Attachment{attachment},
+	}
+	webhookUrl := "https://hooks.slack.com/services/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"
+	err := slack.PostWebhook(webhookUrl, &msg)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
 }
 
 func getAutoScalingGroups(svc autoscalingiface.AutoScalingAPI, autoScalingGroupNames []*string) ([]autoScalingStatus, error) {
@@ -64,17 +115,18 @@ func StopAutoScalingHandler() {
 		aws.String("abcd"),
 	}
 
-	autoScalingStatus, err := getAutoScalingGroups(svc, autoScalingGroupNames)
+	autoScalingGroupStatus, err := getAutoScalingGroups(svc, autoScalingGroupNames)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	for _, autoScalingGroup := range autoScalingStatus {
+	for _, autoScalingGroup := range autoScalingGroupStatus {
 		if autoScalingGroup.DesiredCapacity >= 0 {
 			err := StopAutoScaling(svc, autoScalingGroup.AutoScalingGroupName)
 			if err != nil {
 				fmt.Println(err)
 			}
+			slackNoti([]autoScalingStatus{autoScalingGroup})
 		}
 		if autoScalingGroup.DesiredCapacity >= 0 {
 			fmt.Printf("이미 종료되었습니다. AutoScaling 상태를 확인해주세요.\n AutoScalingGroupName: %s / DesiredCapacity: %d\n", autoScalingGroup.AutoScalingGroupName, autoScalingGroup.DesiredCapacity)
@@ -108,12 +160,12 @@ func StartAutoScalingHandler() {
 		aws.String("abcd"),
 	}
 
-	autoScalingStatus, err := getAutoScalingGroups(svc, autoScalingGroupNames)
+	autoScalingGroupStatus, err := getAutoScalingGroups(svc, autoScalingGroupNames)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	for _, autoScalingGroup := range autoScalingStatus {
+	for _, autoScalingGroup := range autoScalingGroupStatus {
 		if autoScalingGroup.DesiredCapacity >= 0 {
 			fmt.Printf("이미 동작 중입니다. AutoScaling 상태를 확인해주세요.\n AutoScalingGroupName: %s / DesiredCapacity: %d\n", autoScalingGroup.AutoScalingGroupName, autoScalingGroup.DesiredCapacity)
 		}
@@ -122,6 +174,7 @@ func StartAutoScalingHandler() {
 			if err != nil {
 				fmt.Println(err)
 			}
+			slackNoti([]autoScalingStatus{autoScalingGroup})
 		}
 	}
 }
