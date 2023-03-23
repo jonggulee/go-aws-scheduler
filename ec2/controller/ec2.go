@@ -25,7 +25,7 @@ func slackNoti(inst []instanceStatus) error {
 	attachment := slack.Attachment{
 		Fields: []slack.AttachmentField{
 			{
-				Title: "Instance start result",
+				Title: "instance result",
 				Value: ":white_check_mark: Success",
 				Short: false,
 			},
@@ -199,6 +199,7 @@ func StartInstanceHandler() {
 					Err:    nil,
 				}
 				instances = append(instances, instance)
+				fmt.Println(instance)
 				continue
 			}
 		}
@@ -270,6 +271,7 @@ func StopInstanceHandler() {
 					Id:     instanceId,
 					Err:    nil,
 				}
+				fmt.Println(instance)
 				instances = append(instances, instance)
 				continue
 			}
