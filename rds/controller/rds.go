@@ -25,7 +25,7 @@ func slackNoti(inst []dbInstanceStatus) error {
 		Color: color,
 		Fields: []slack.AttachmentField{
 			{
-				Title: "Stop DB result",
+				Title: "DB result",
 				Value: ":white_check_mark: Success",
 				Short: false,
 			},
