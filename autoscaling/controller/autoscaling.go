@@ -44,13 +44,14 @@ func slackNoti(autoScalingStatus []autoScalingStatus) error {
 		if autoScalingStatus.Err != nil {
 			attachment.Fields = append(attachment.Fields, slack.AttachmentField{
 				Title: "Error",
-				Value: fmt.Sprintf("```%s```", autoScalingStatus.AutoScalingGroupName),
+				Value: fmt.Sprintf("```%s```", autoScalingStatus.Err),
 				Short: false,
 			})
 			targetField := &attachment.Fields[0]
 			targetField.Value = failedValue
 			attachment.Color = failedColor
 		}
+		value += fmt.Sprintf("%s %s\n", autoScalingStatus.Msg, autoScalingStatus.AutoScalingGroupName)
 	}
 	attachment.Fields[1].Value = value + "```"
 
