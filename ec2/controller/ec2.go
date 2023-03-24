@@ -151,7 +151,7 @@ func StartInstanceHandler() {
 		// sec-mgmt-jenkins
 		aws.String("i-0acab82eb643706cd"),
 		// sec-mgmt-eks-admin
-		aws.String("i-04a4829ec4cf60254"),
+		// aws.String("i-04a4829ec4cf60254"),
 	}
 
 	getInstanceStatus, err := getInstanceStatus(svc, instanceIDs)
