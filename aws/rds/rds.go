@@ -41,8 +41,6 @@ func (e *Rds) GetStatus() error {
 		e.Status = *dbInstance.DBInstanceStatus
 	}
 
-	fmt.Println(e.Id, e.Status, e.Msg)
-
 	return nil
 }
 
