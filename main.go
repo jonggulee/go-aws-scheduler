@@ -35,9 +35,9 @@ func handler() {
 			if action == "stop" {
 				scheduler.Stop()
 			}
-			if action == "start" {
-				scheduler.Start()
-			}
+			// if action == "start" {
+			// 	scheduler.Start()
+			// }
 		}
 	}
 }

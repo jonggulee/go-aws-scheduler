@@ -1,10 +1,7 @@
 package common
 
 type Handler interface {
-	GetStatus() (string, error)
+	GetStatus() error
 	Stop() (string, error)
 	Start() (string, error)
-
-	// Stop(string) (string, error)
-	// Start()
 }

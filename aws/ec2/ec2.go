@@ -27,7 +27,7 @@ func New(id, status, msg string) *EC2 {
 	return &EC2{Id: id, Status: status, Msg: msg}
 }
 
-func (e *EC2) GetStatus() (string, error) {
+func (e *EC2) GetStatus() error {
 	sess := utils.Sess()
 	svc := ec2.New(sess)
 
@@ -45,7 +45,7 @@ func (e *EC2) GetStatus() (string, error) {
 		}
 	}
 
-	return e.Status, nil
+	return nil
 }
 
 func (e *EC2) Stop() (string, error) {
@@ -93,8 +93,8 @@ func (e *EC2) Start() (string, error) {
 
 	if e.Status == "running" {
 		e.Msg = AlreadyStartMsg
-
 		fmt.Printf("CurrentStatus: %s, ID: %s, Msg: %s\n", e.Status, e.Id, e.Msg)
+
 	} else if e.Status == "stopped" {
 		input := &ec2.StartInstancesInput{
 			InstanceIds: []*string{aws.String(e.Id)},

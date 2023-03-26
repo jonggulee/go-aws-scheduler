@@ -25,7 +25,7 @@ func New(id, status, msg string) *Rds {
 	return &Rds{Id: id, Status: status, Msg: msg}
 }
 
-func (e *Rds) GetStatus() (string, error) {
+func (e *Rds) GetStatus() error {
 	sess := utils.Sess()
 	svc := rds.New(sess)
 
@@ -43,7 +43,7 @@ func (e *Rds) GetStatus() (string, error) {
 
 	fmt.Println(e.Id, e.Status, e.Msg)
 
-	return e.Status, nil
+	return nil
 }
 
 func (e *Rds) Stop() (string, error) {
