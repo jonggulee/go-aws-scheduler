@@ -1,21 +1,39 @@
 package main
 
 import (
-	"fmt"
+	"os"
+	"strings"
 
 	"github.com/MZCBBD/AWSScheduler/aws"
 )
 
-var services []string
-
-func init() {
-	services = append(services, "ec2", "rds")
-}
-
 func handler() {
-	for _, service := range services {
-		h := aws.NewAwsScheduler(service, "")
-		fmt.Println(h.GetStatus())
+	service := os.Getenv("service")
+	action := os.Getenv("action")
+
+	m := make(map[string][]string)
+	for _, s := range strings.Split(service, ",") {
+		parts := strings.Split(s, ":")
+		key := parts[0]
+		value := parts[1]
+		if m[key] == nil {
+			m[key] = []string{value}
+		} else {
+			m[key] = append(m[key], value)
+		}
+	}
+
+	for service, IDs := range m {
+		for _, Id := range IDs {
+			scheduler := aws.NewAwsScheduler(service, Id)
+			scheduler.GetStatus()
+			if action == "stop" {
+				scheduler.Stop()
+			}
+			if action == "start" {
+				scheduler.Start()
+			}
+		}
 	}
 }
 
