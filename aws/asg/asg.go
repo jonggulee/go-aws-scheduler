@@ -19,7 +19,7 @@ const (
 	AlreadyStopMsg  = "이미 ASG가 중지되어있습니다."
 	StartMsg        = "정상적으로 ASG가 시작되었습니다."
 	AlreadyStartMsg = "이미 ASG가 동작중입니다."
-	UnknownMsg      = "알수 없는 오류 입니다. ASG의 상태를 확인해주세요."
+	UnknownMsg      = "알 수 없는 오류 입니다. ASG의 상태를 확인해주세요."
 )
 
 func New(id, msg string, status int) *Asg {
