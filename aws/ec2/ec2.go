@@ -35,7 +35,9 @@ func (e *EC2) GetStatus() (string, error) {
 		InstanceIds: []*string{aws.String(e.Id)},
 	}
 	output, err := svc.DescribeInstances(input)
-	utils.HandleErr(err)
+	if err != nil {
+		e.Msg = err.Error()
+	}
 
 	for _, reservation := range output.Reservations {
 		for _, instance := range reservation.Instances {
@@ -52,8 +54,8 @@ func (e *EC2) Stop() (string, error) {
 
 	if e.Status == "stopped" {
 		e.Msg = AlreadyStopMsg
-
 		fmt.Printf("CurrentStatus: %s, ID: %s, Msg: %s\n", e.Status, e.Id, e.Msg)
+
 	} else if e.Status == "running" {
 		input := &ec2.StopInstancesInput{
 			InstanceIds: []*string{aws.String(e.Id)},
