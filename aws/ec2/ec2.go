@@ -94,7 +94,6 @@ func (e *EC2) Start() (string, error) {
 	if e.Status == "running" {
 		e.Msg = AlreadyStartMsg
 		fmt.Printf("CurrentStatus: %s, ID: %s, Msg: %s\n", e.Status, e.Id, e.Msg)
-
 	} else if e.Status == "stopped" {
 		input := &ec2.StartInstancesInput{
 			InstanceIds: []*string{aws.String(e.Id)},

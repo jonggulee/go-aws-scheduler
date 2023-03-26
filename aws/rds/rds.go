@@ -53,8 +53,6 @@ func (e *Rds) Stop() (string, error) {
 	if e.Status == "stopped" {
 		e.Msg = AlreadyStopMsg
 		fmt.Printf("CurrentStatus: %s, ID: %s, Msg: %s\n", e.Status, e.Id, e.Msg)
-
-		return "", nil
 	} else if e.Status == "available" {
 		input := &rds.StopDBInstanceInput{
 			DBInstanceIdentifier: &e.Id,

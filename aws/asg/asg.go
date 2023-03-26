@@ -42,7 +42,6 @@ func (e *Asg) GetStatus() error {
 		e.Status = int(*autoScalingGroups.DesiredCapacity)
 	}
 
-	// fmt.Printf("get status: %s, %s, %d\n", e.Id, e.Msg, e.Status)
 	return nil
 }
 
