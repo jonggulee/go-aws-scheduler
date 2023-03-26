@@ -7,10 +7,7 @@ import (
 	"github.com/MZCBBD/AWSScheduler/aws"
 )
 
-func handler() {
-	service := os.Getenv("service")
-	action := os.Getenv("action")
-
+func parseService(service string) map[string][]string {
 	m := make(map[string][]string)
 	for _, s := range strings.Split(service, ",") {
 		parts := strings.Split(s, ":")
@@ -22,6 +19,14 @@ func handler() {
 			m[key] = append(m[key], value)
 		}
 	}
+	return m
+}
+
+func handler() {
+	service := os.Getenv("service")
+	action := os.Getenv("action")
+
+	m := parseService(service)
 
 	for service, IDs := range m {
 		for _, Id := range IDs {
