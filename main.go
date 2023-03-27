@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -33,11 +34,13 @@ func handler() {
 			scheduler := aws.NewAwsScheduler(service, Id)
 			scheduler.GetStatus()
 			if action == "stop" {
+				fmt.Printf("Action: %s, Service: %s, ID: %s\n", action, service, Id)
 				scheduler.Stop()
 			}
-			// if action == "start" {
-			// 	scheduler.Start()
-			// }
+			if action == "start" {
+				fmt.Printf("Action: %s, Service: %s, ID: %s\n", action, service, Id)
+				scheduler.Start()
+			}
 		}
 	}
 }

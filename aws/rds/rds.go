@@ -11,6 +11,7 @@ type Rds struct {
 	Id     string
 	Status string
 	Msg    string
+	IsErr  bool
 }
 
 const (
@@ -21,8 +22,8 @@ const (
 	UnknownMsg      = "알 수 없는 오류 입니다. 인스턴스의 상태를 확인해주세요."
 )
 
-func New(id, status, msg string) *Rds {
-	return &Rds{Id: id, Status: status, Msg: msg}
+func New(id, status, msg string, isErr bool) *Rds {
+	return &Rds{Id: id, Status: status, Msg: msg, IsErr: isErr}
 }
 
 func (e *Rds) GetStatus() error {
@@ -50,8 +51,9 @@ func (e *Rds) Stop() (string, error) {
 
 	if e.Status == "stopped" {
 		e.Msg = AlreadyStopMsg
-		fmt.Printf("CurrentStatus: %s, ID: %s, Msg: %s\n", e.Status, e.Id, e.Msg)
-		utils.SlackNoti(e.Status, e.Id, e.Msg)
+		e.IsErr = true
+		fmt.Printf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
+
 	} else if e.Status == "available" {
 		input := &rds.StopDBInstanceInput{
 			DBInstanceIdentifier: &e.Id,
@@ -62,13 +64,15 @@ func (e *Rds) Stop() (string, error) {
 		e.Msg = StopMsg
 		e.Status = *output.DBInstance.DBInstanceStatus
 
-		fmt.Printf("CurrentStatus: %s, ID: %s, Msg: %s\n", e.Status, e.Id, e.Msg)
+		fmt.Printf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 		return "", nil
 	} else {
 		e.Msg = UnknownMsg
-		fmt.Printf("CurrentStatus: %s, ID: %s, Msg: %s\n", e.Status, e.Id, e.Msg)
+		e.IsErr = true
+		fmt.Printf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	}
 
+	utils.SlackNoti(e.Status, e.Id, e.Msg, e.IsErr)
 	return "", nil
 }
 
@@ -78,9 +82,8 @@ func (e *Rds) Start() (string, error) {
 
 	if e.Status == "available" {
 		e.Msg = AlreadyStartMsg
-		fmt.Printf("CurrentStatus: %s, ID: %s, Msg: %s\n", e.Status, e.Id, e.Msg)
-
-		return "", nil
+		e.IsErr = true
+		fmt.Printf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	} else if e.Status == "stopped" {
 		input := &rds.StartDBInstanceInput{
 			DBInstanceIdentifier: &e.Id,
@@ -91,12 +94,13 @@ func (e *Rds) Start() (string, error) {
 		e.Msg = StartMsg
 		e.Status = *output.DBInstance.DBInstanceStatus
 
-		fmt.Printf("CurrentStatus: %s, ID: %s, Msg: %s\n", e.Status, e.Id, e.Msg)
-		return "", nil
+		fmt.Printf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	} else {
 		e.Msg = UnknownMsg
-		fmt.Printf("CurrentStatus: %s, ID: %s, Msg: %s\n", e.Status, e.Id, e.Msg)
+		e.IsErr = true
+		fmt.Printf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	}
 
+	utils.SlackNoti(e.Status, e.Id, e.Msg, e.IsErr)
 	return "", nil
 }

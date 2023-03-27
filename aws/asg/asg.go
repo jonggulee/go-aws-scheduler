@@ -12,6 +12,7 @@ type Asg struct {
 	Id     string
 	Status int
 	Msg    string
+	IsErr  bool
 }
 
 const (
@@ -22,8 +23,8 @@ const (
 	UnknownMsg      = "알 수 없는 오류 입니다. ASG의 상태를 확인해주세요."
 )
 
-func New(id, msg string, status int) *Asg {
-	return &Asg{Id: id, Msg: msg, Status: status}
+func New(id, msg string, status int, isErr bool) *Asg {
+	return &Asg{Id: id, Msg: msg, Status: status, IsErr: isErr}
 }
 
 func (e *Asg) GetStatus() error {
@@ -51,7 +52,8 @@ func (e *Asg) Stop() (string, error) {
 
 	if e.Status == 0 {
 		e.Msg = AlreadyStopMsg
-		fmt.Printf("CurrentStatus: %d, ID: %s, Msg: %s\n", e.Status, e.Id, e.Msg)
+		e.IsErr = true
+		fmt.Printf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	} else if e.Status >= 0 {
 		input := &autoscaling.SetDesiredCapacityInput{
 			AutoScalingGroupName: aws.String(e.Id),
@@ -65,13 +67,15 @@ func (e *Asg) Stop() (string, error) {
 		e.Msg = StopMsg
 		e.Status = int(*input.DesiredCapacity)
 
-		fmt.Printf("CurrentStatus: %d, ID: %s, Msg: %s\n", e.Status, e.Id, e.Msg)
+		fmt.Printf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 		return "", nil
 	} else {
 		e.Msg = UnknownMsg
-		fmt.Printf("CurrentStatus: %d, ID: %s, Msg: %s\n", e.Status, e.Id, e.Msg)
+		e.IsErr = true
+		fmt.Printf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	}
 
+	utils.SlackNoti(e.Status, e.Id, e.Msg, e.IsErr)
 	return "", nil
 }
 
@@ -81,7 +85,8 @@ func (e *Asg) Start() (string, error) {
 
 	if e.Status >= 0 {
 		e.Msg = AlreadyStartMsg
-		fmt.Printf("CurrentStatus: %d, ID: %s, Msg: %s\n", e.Status, e.Id, e.Msg)
+		e.IsErr = true
+		fmt.Printf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	} else if e.Status == 0 {
 		input := &autoscaling.SetDesiredCapacityInput{
 			AutoScalingGroupName: aws.String(e.Id),
@@ -96,12 +101,14 @@ func (e *Asg) Start() (string, error) {
 		e.Msg = StartMsg
 		e.Status = int(*input.DesiredCapacity)
 
-		fmt.Printf("CurrentStatus: %d, ID: %s, Msg: %s\n", e.Status, e.Id, e.Msg)
+		fmt.Printf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 		return "", nil
 	} else {
 		e.Msg = UnknownMsg
-		fmt.Printf("CurrentStatus: %d, ID: %s, Msg: %s\n", e.Status, e.Id, e.Msg)
+		e.IsErr = true
+		fmt.Printf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	}
 
+	utils.SlackNoti(e.Status, e.Id, e.Msg, e.IsErr)
 	return "", nil
 }
