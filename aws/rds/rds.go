@@ -51,6 +51,7 @@ func (e *Rds) Stop() (string, error) {
 	if e.Status == "stopped" {
 		e.Msg = AlreadyStopMsg
 		fmt.Printf("CurrentStatus: %s, ID: %s, Msg: %s\n", e.Status, e.Id, e.Msg)
+		utils.SlackNoti(e.Status, e.Id, e.Msg)
 	} else if e.Status == "available" {
 		input := &rds.StopDBInstanceInput{
 			DBInstanceIdentifier: &e.Id,
