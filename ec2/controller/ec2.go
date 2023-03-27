@@ -25,7 +25,7 @@ func slackNoti(inst []instanceStatus) error {
 	attachment := slack.Attachment{
 		Fields: []slack.AttachmentField{
 			{
-				Title: "instance result",
+				Title: "Instance result",
 				Value: ":white_check_mark: Success",
 				Short: false,
 			},
