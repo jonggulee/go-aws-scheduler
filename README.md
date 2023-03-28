@@ -1,9 +1,6 @@
-# AWSScheduler
-AWS 스케쥴러 람다
+# AWS Lambda Scheduler
 
-# Project Title
-
-AWS 스케쥴러 람다
+AutoScaling, EC2, RDS 서비스를 자동으로 재시작하는 lambda functions 입니다.
 
 ## Getting Started
 ```
