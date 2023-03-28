@@ -14,7 +14,7 @@ func main() {
 
 ## Building your function
 
-AWS Lambda에 배포하려면 Linux로 컴파일 후 .zip 파일에 저장되어야 한다.
+AWS Lambda에 배포하려면 Linux로 컴파일 후 .zip 파일에 저장되어야 합니다.
 
 ### For developers on Linux and macOS
 
