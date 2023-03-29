@@ -198,8 +198,8 @@ func StartInstanceHandler() {
 					Id:     instanceId,
 					Err:    nil,
 				}
-				instances = append(instances, instance)
 				fmt.Println(instance)
+				instances = append(instances, instance)
 				continue
 			}
 		}
