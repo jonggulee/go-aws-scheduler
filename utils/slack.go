@@ -7,23 +7,21 @@ import (
 )
 
 const (
-	// WebhookUrl   = "https://hooks.slack.com/services/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"
-
 	// test
-	WebhookUrl   = "https://hooks.slack.com/services/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"
+	WebhookUrl = "https://hooks.slack.com/services/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"
+
+	// WebhookUrl   = "https://hooks.slack.com/services/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"
 	SuccessColor = "#18be52"
 	FailedColor  = "#E96D76"
+	SuccessMsg   = ":white_check_mark: Success"
+	FailedMsg    = ":x: Failed"
 )
 
 func SlackNoti(status interface{}, id, msg string, isErr bool) error {
-	SuccessMsg := ":white_check_mark: Success"
-	FailedMsg := ":x: Failed"
-	defaultResultTitle := "Result"
-
 	color := ""
 	attachment := slack.Attachment{
 		Fields: []slack.AttachmentField{
-			{Title: defaultResultTitle, Value: "", Short: false},
+			{Title: "Result", Value: "", Short: false},
 			{Title: "Target", Value: "", Short: false},
 		},
 	}
