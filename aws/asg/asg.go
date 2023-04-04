@@ -3,6 +3,7 @@ package asg
 import (
 	"fmt"
 
+	"github.com/MZCBBD/AWSScheduler/aws/common"
 	"github.com/MZCBBD/AWSScheduler/utils"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
@@ -28,7 +29,7 @@ func New(id, msg string, status int, isErr bool) *Asg {
 }
 
 func (e *Asg) GetStatus() {
-	sess := utils.Sess()
+	sess := common.Sess()
 	svc := autoscaling.New(sess)
 
 	input := &autoscaling.DescribeAutoScalingGroupsInput{
@@ -45,7 +46,7 @@ func (e *Asg) GetStatus() {
 }
 
 func (e *Asg) Stop() {
-	sess := utils.Sess()
+	sess := common.Sess()
 	svc := autoscaling.New(sess)
 
 	if e.Status == 0 {
@@ -76,7 +77,7 @@ func (e *Asg) Stop() {
 }
 
 func (e *Asg) Start() {
-	sess := utils.Sess()
+	sess := common.Sess()
 	svc := autoscaling.New(sess)
 
 	if e.Status >= 0 {

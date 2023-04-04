@@ -3,6 +3,7 @@ package ec2
 import (
 	"fmt"
 
+	"github.com/MZCBBD/AWSScheduler/aws/common"
 	"github.com/MZCBBD/AWSScheduler/utils"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -29,7 +30,7 @@ func New(id, status, msg string, isErr bool) *EC2 {
 }
 
 func (e *EC2) GetStatus() {
-	sess := utils.Sess()
+	sess := common.Sess()
 	svc := ec2.New(sess)
 
 	input := &ec2.DescribeInstancesInput{
@@ -48,7 +49,7 @@ func (e *EC2) GetStatus() {
 }
 
 func (e *EC2) Stop() {
-	sess := utils.Sess()
+	sess := common.Sess()
 	svc := ec2.New(sess)
 
 	if e.Status == "stopped" {
@@ -88,7 +89,7 @@ func (e *EC2) Stop() {
 }
 
 func (e *EC2) Start() {
-	sess := utils.Sess()
+	sess := common.Sess()
 	svc := ec2.New(sess)
 
 	if e.Status == "running" {

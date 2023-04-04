@@ -3,6 +3,7 @@ package rds
 import (
 	"fmt"
 
+	"github.com/MZCBBD/AWSScheduler/aws/common"
 	"github.com/MZCBBD/AWSScheduler/utils"
 	"github.com/aws/aws-sdk-go/service/rds"
 )
@@ -27,7 +28,7 @@ func New(id, status, msg string, isErr bool) *Rds {
 }
 
 func (e *Rds) GetStatus() {
-	sess := utils.Sess()
+	sess := common.Sess()
 	svc := rds.New(sess)
 
 	input := &rds.DescribeDBInstancesInput{
@@ -44,7 +45,7 @@ func (e *Rds) GetStatus() {
 }
 
 func (e *Rds) Stop() {
-	sess := utils.Sess()
+	sess := common.Sess()
 	svc := rds.New(sess)
 
 	if e.Status == "stopped" {
@@ -73,7 +74,7 @@ func (e *Rds) Stop() {
 }
 
 func (e *Rds) Start() {
-	sess := utils.Sess()
+	sess := common.Sess()
 	svc := rds.New(sess)
 
 	if e.Status == "available" {
