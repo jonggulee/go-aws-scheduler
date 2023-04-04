@@ -10,10 +10,11 @@ import (
 )
 
 type Asg struct {
-	Id     string
-	Status int
-	Msg    string
-	IsErr  bool
+	Id       string
+	Status   int
+	Msg      string
+	MsgSlack string
+	IsErr    bool
 }
 
 const (
@@ -24,7 +25,7 @@ const (
 	MsgUnknown      = "알 수 없는 오류 입니다. ASG의 상태를 확인해주세요."
 )
 
-func New(id, msg string, status int, isErr bool) *Asg {
+func New(id, msg, msgSlack string, status int, isErr bool) *Asg {
 	return &Asg{Id: id, Msg: msg, Status: status, IsErr: isErr}
 }
 
@@ -51,8 +52,7 @@ func (e *Asg) Stop() {
 
 	if e.Status == 0 {
 		e.Msg = MsgAlreadyStop
-		e.IsErr = true
-		fmt.Printf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
+		e.MsgSlack = fmt.Sprintf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	} else if e.Status >= 0 {
 		input := &autoscaling.SetDesiredCapacityInput{
 			AutoScalingGroupName: aws.String(e.Id),
@@ -65,25 +65,23 @@ func (e *Asg) Stop() {
 
 		e.Msg = MsgStop
 		e.Status = int(*input.DesiredCapacity)
-
-		fmt.Printf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
+		e.MsgSlack = fmt.Sprintf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	} else {
 		e.Msg = MsgUnknown
 		e.IsErr = true
-		fmt.Printf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
+		e.MsgSlack = fmt.Sprintf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	}
 
-	utils.SlackNoti(e.Status, e.Id, e.Msg, e.IsErr)
+	utils.InputSlackData(e.MsgSlack, e.IsErr)
 }
 
 func (e *Asg) Start() {
 	sess := common.Sess()
 	svc := autoscaling.New(sess)
 
-	if e.Status >= 0 {
+	if e.Status > 0 {
 		e.Msg = MsgAlreadyStart
-		e.IsErr = true
-		fmt.Printf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
+		e.MsgSlack = fmt.Sprintf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	} else if e.Status == 0 {
 		input := &autoscaling.SetDesiredCapacityInput{
 			AutoScalingGroupName: aws.String(e.Id),
@@ -98,12 +96,12 @@ func (e *Asg) Start() {
 		e.Msg = MsgStart
 		e.Status = int(*input.DesiredCapacity)
 
-		fmt.Printf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
+		e.MsgSlack = fmt.Sprintf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	} else {
 		e.Msg = MsgUnknown
 		e.IsErr = true
-		fmt.Printf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
+		e.MsgSlack = fmt.Sprintf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	}
 
-	utils.SlackNoti(e.Status, e.Id, e.Msg, e.IsErr)
+	utils.InputSlackData(e.MsgSlack, e.IsErr)
 }

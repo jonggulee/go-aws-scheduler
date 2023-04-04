@@ -11,10 +11,11 @@ import (
 )
 
 type EC2 struct {
-	Id     string
-	Status string
-	Msg    string
-	IsErr  bool
+	Id       string
+	Status   string
+	Msg      string
+	MsgSlack string
+	IsErr    bool
 }
 
 const (
@@ -25,8 +26,8 @@ const (
 	MsgUnknown      = "알 수 없는 오류 입니다. 인스턴스의 상태를 확인해주세요."
 )
 
-func New(id, status, msg string, isErr bool) *EC2 {
-	return &EC2{Id: id, Status: status, Msg: msg, IsErr: isErr}
+func New(id, status, msg, msgSlack string, isErr bool) *EC2 {
+	return &EC2{Id: id, Status: status, Msg: msg, MsgSlack: msgSlack, IsErr: isErr}
 }
 
 func (e *EC2) GetStatus() {
@@ -54,8 +55,7 @@ func (e *EC2) Stop() {
 
 	if e.Status == "stopped" {
 		e.Msg = MsgAlreadyStop
-		e.IsErr = true
-		fmt.Printf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
+		e.MsgSlack = fmt.Sprintf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 
 	} else if e.Status == "running" {
 		input := &ec2.StopInstancesInput{
@@ -77,15 +77,15 @@ func (e *EC2) Stop() {
 			e.Msg = MsgStop
 			e.Status = *currentState.Name
 
-			fmt.Printf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
+			e.MsgSlack = fmt.Sprintf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 		}
 	} else {
 		e.Msg = MsgUnknown
 		e.IsErr = true
-		fmt.Printf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
+		e.MsgSlack = fmt.Sprintf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	}
 
-	utils.SlackNoti(e.Status, e.Id, e.Msg, e.IsErr)
+	utils.InputSlackData(e.MsgSlack, e.IsErr)
 }
 
 func (e *EC2) Start() {
@@ -94,8 +94,7 @@ func (e *EC2) Start() {
 
 	if e.Status == "running" {
 		e.Msg = MsgAlreadyStart
-		e.IsErr = true
-		fmt.Printf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
+		e.MsgSlack = fmt.Sprintf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	} else if e.Status == "stopped" {
 		input := &ec2.StartInstancesInput{
 			InstanceIds: []*string{aws.String(e.Id)},
@@ -116,13 +115,13 @@ func (e *EC2) Start() {
 			e.Msg = MsgStart
 			e.Status = *currentState.Name
 
-			fmt.Printf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
+			e.MsgSlack = fmt.Sprintf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 		}
 	} else {
 		e.Msg = MsgUnknown
 		e.IsErr = true
-		fmt.Printf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
+		e.MsgSlack = fmt.Sprintf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	}
 
-	utils.SlackNoti(e.Status, e.Id, e.Msg, e.IsErr)
+	utils.InputSlackData(e.MsgSlack, e.IsErr)
 }

@@ -10,12 +10,12 @@ import (
 func NewAwsScheduler(service string, Id string) common.Handler {
 	switch service {
 	case "ec2":
-		return ec2.New(Id, "", "", false)
+		return ec2.New(Id, "", "", "", false)
 	case "rds":
-		return rds.New(Id, "", "", false)
+		return rds.New(Id, "", "", "", false)
 	case "asg":
-		return asg.New(Id, "", 0, false)
+		return asg.New(Id, "", "", 0, false)
 	default:
-		return ec2.New(Id, "", "", false)
+		return ec2.New(Id, "", "", "", false)
 	}
 }

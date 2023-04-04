@@ -17,18 +17,34 @@ const (
 	FailedMsg    = ":x: Failed"
 )
 
-func SlackNoti(status interface{}, id, msg string, isErr bool) error {
+var message []string
+var hasError bool
+
+func InputSlackData(msg string, isErr bool) {
+	message = append(message, msg)
+	hasError = isErr || hasError
+}
+
+func getSlackMessages() string {
+	var messages string
+
+	msg := &message
+	for _, mergeMsg := range *msg {
+		messages += fmt.Sprint(mergeMsg)
+	}
+	return messages
+}
+
+func SendSlackMessage() {
 	color := ""
 	attachment := slack.Attachment{
 		Fields: []slack.AttachmentField{
 			{Title: "Result", Value: "", Short: false},
-			{Title: "Target", Value: "", Short: false},
 		},
 	}
 
-	value := fmt.Sprintf("%s\n", id)
-
-	if isErr {
+	msg := getSlackMessages()
+	if hasError {
 		color = FailedColor
 		attachment.Fields = append(attachment.Fields, slack.AttachmentField{
 			Title: "Message", Value: fmt.Sprintf("```%s```", msg), Short: false,
@@ -36,26 +52,18 @@ func SlackNoti(status interface{}, id, msg string, isErr bool) error {
 		attachment.Fields[0].Value = FailedMsg
 	}
 
-	if !isErr {
+	if !hasError {
 		color = SuccessColor
 		attachment.Fields = append(attachment.Fields, slack.AttachmentField{
 			Title: "Message", Value: fmt.Sprintf("```%s```", msg), Short: false,
 		})
 		attachment.Fields[0].Value = SuccessMsg
 	}
-
-	attachment.Fields[1].Value = fmt.Sprintf("```%s```", value)
 	attachment.Color = color
-
 	message := slack.WebhookMessage{
 		Attachments: []slack.Attachment{attachment},
 	}
 
 	err := slack.PostWebhook(WebhookUrl, &message)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	return nil
+	HandleErr(err)
 }

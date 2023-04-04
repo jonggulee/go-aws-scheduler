@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/MZCBBD/AWSScheduler/aws"
+	"github.com/MZCBBD/AWSScheduler/utils"
 )
 
 func parseService(service string) map[string][]string {
@@ -43,7 +44,7 @@ func handler() {
 			}
 		}
 	}
-	// utils.SlackNoti()
+	utils.SendSlackMessage()
 }
 
 func main() {
