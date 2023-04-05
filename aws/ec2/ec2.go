@@ -37,6 +37,7 @@ func (e *EC2) GetStatus() {
 	input := &ec2.DescribeInstancesInput{
 		InstanceIds: []*string{aws.String(e.Id)},
 	}
+
 	output, err := svc.DescribeInstances(input)
 	if err != nil {
 		e.Msg = err.Error()
@@ -65,7 +66,6 @@ func (e *EC2) Stop() {
 
 		output, err := svc.StopInstances(input)
 		awsErr, ok := err.(awserr.Error)
-
 		if ok && awsErr.Code() == "DryRunOperation" {
 			input.DryRun = aws.Bool(false)
 			output, err = svc.StopInstances(input)
@@ -76,7 +76,6 @@ func (e *EC2) Stop() {
 			currentState := stoppingInstance.CurrentState
 			e.Msg = MsgStop
 			e.Status = *currentState.Name
-
 			e.MsgSlack = fmt.Sprintf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 		}
 	} else {
@@ -103,7 +102,6 @@ func (e *EC2) Start() {
 
 		output, err := svc.StartInstances(input)
 		awsErr, ok := err.(awserr.Error)
-
 		if ok && awsErr.Code() == "DryRunOperation" {
 			input.DryRun = aws.Bool(false)
 			output, err = svc.StartInstances(input)
@@ -114,7 +112,6 @@ func (e *EC2) Start() {
 			currentState := startingInstance.CurrentState
 			e.Msg = MsgStart
 			e.Status = *currentState.Name
-
 			e.MsgSlack = fmt.Sprintf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 		}
 	} else {

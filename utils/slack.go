@@ -7,10 +7,7 @@ import (
 )
 
 const (
-	// test
-	WebhookUrl = "https://hooks.slack.com/services/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"
-
-	// WebhookUrl   = "https://hooks.slack.com/services/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"
+	WebhookUrl   = "https://hooks.slack.com/services/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"
 	SuccessColor = "#18be52"
 	FailedColor  = "#E96D76"
 	SuccessMsg   = ":white_check_mark: Success"
@@ -28,8 +25,7 @@ func InputSlackData(msg string, isErr bool) {
 func getSlackMessages() string {
 	var messages string
 
-	msg := &message
-	for _, mergeMsg := range *msg {
+	for _, mergeMsg := range message {
 		messages += fmt.Sprint(mergeMsg)
 	}
 	return messages
@@ -44,6 +40,7 @@ func SendSlackMessage() {
 	}
 
 	msg := getSlackMessages()
+
 	if hasError {
 		color = FailedColor
 		attachment.Fields = append(attachment.Fields, slack.AttachmentField{
@@ -59,6 +56,7 @@ func SendSlackMessage() {
 		})
 		attachment.Fields[0].Value = SuccessMsg
 	}
+
 	attachment.Color = color
 	message := slack.WebhookMessage{
 		Attachments: []slack.Attachment{attachment},

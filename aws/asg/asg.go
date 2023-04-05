@@ -58,6 +58,7 @@ func (e *Asg) Stop() {
 			AutoScalingGroupName: aws.String(e.Id),
 			DesiredCapacity:      aws.Int64(0),
 		}
+
 		_, err := svc.SetDesiredCapacity(input)
 		if err != nil {
 			e.Msg = err.Error()
@@ -95,7 +96,6 @@ func (e *Asg) Start() {
 
 		e.Msg = MsgStart
 		e.Status = int(*input.DesiredCapacity)
-
 		e.MsgSlack = fmt.Sprintf("Error: %t, CurrentStatus: %d, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	} else {
 		e.Msg = MsgUnknown

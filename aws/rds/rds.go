@@ -56,12 +56,12 @@ func (e *Rds) Stop() {
 		input := &rds.StopDBInstanceInput{
 			DBInstanceIdentifier: &e.Id,
 		}
+
 		output, err := svc.StopDBInstance(input)
 		utils.HandleErr(err)
 
 		e.Msg = MsgStop
 		e.Status = *output.DBInstance.DBInstanceStatus
-
 		e.MsgSlack = fmt.Sprintf("Error: %t, CurrentStatus: %s, ID: %s, Msg: %s\n", e.IsErr, e.Status, e.Id, e.Msg)
 	} else {
 		e.Msg = MsgUnknown
