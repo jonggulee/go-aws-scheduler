@@ -7,6 +7,7 @@ import (
 
 	"github.com/MZCBBD/AWSScheduler/aws"
 	"github.com/MZCBBD/AWSScheduler/utils"
+	"github.com/aws/aws-lambda-go/lambda"
 )
 
 func parseService(service string) map[string][]string {
@@ -48,8 +49,5 @@ func handler() {
 }
 
 func main() {
-	// lambda.Start(handler)
-
-	// 로컬 테스트 실행 명령어
-	handler()
+	lambda.Start(handler)
 }
