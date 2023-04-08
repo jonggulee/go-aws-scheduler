@@ -1,45 +1,53 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
-	autoscaling "github.com/MZCBBD/AWSScheduler/autoscaling/controller"
-	ec2 "github.com/MZCBBD/AWSScheduler/ec2/controller"
-	rds "github.com/MZCBBD/AWSScheduler/rds/controller"
+	"github.com/MZCBBD/AWSScheduler/aws"
+	"github.com/MZCBBD/AWSScheduler/utils"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-func handler() {
-	if os.Getenv("target") == "rds" {
-		if os.Getenv("env") == "stop" {
-			rds.StopDBInstanceHandler()
-		}
-		if os.Getenv("env") == "start" {
-			rds.StartDBInstanceHandler()
-		}
-	}
-	if os.Getenv("target") == "ec2" {
-		if os.Getenv("env") == "stop" {
-			ec2.StopInstanceHandler()
-		}
-		if os.Getenv("env") == "start" {
-			ec2.StartInstanceHandler()
+func parseService(service string) map[string][]string {
+	m := make(map[string][]string)
+	for _, s := range strings.Split(service, ",") {
+		parts := strings.Split(s, ":")
+		key := parts[0]
+		value := parts[1]
+		if m[key] == nil {
+			m[key] = []string{value}
+		} else {
+			m[key] = append(m[key], value)
 		}
 	}
-	if os.Getenv("target") == "autoscaling" {
-		if os.Getenv("env") == "stop" {
-			autoscaling.StopAutoScalingHandler()
+	return m
+}
 
-		}
-		if os.Getenv("env") == "start" {
-			autoscaling.StartAutoScalingHandler()
+func handler() {
+	service := os.Getenv("service")
+	action := os.Getenv("action")
+
+	m := parseService(service)
+
+	for service, IDs := range m {
+		for _, Id := range IDs {
+			scheduler := aws.NewAwsScheduler(service, Id)
+			scheduler.GetStatus()
+			if action == "stop" {
+				fmt.Printf("Action: %s, Service: %s, ID: %s\n", action, service, Id)
+				scheduler.Stop()
+			}
+			if action == "start" {
+				fmt.Printf("Action: %s, Service: %s, ID: %s\n", action, service, Id)
+				scheduler.Start()
+			}
 		}
 	}
+	utils.SendSlackMessage()
 }
 
 func main() {
 	lambda.Start(handler)
-
-	// 로컬 테스트 실행 명령어
-	// handler()
 }
